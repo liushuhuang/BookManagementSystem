@@ -1,0 +1,130 @@
+-- 创建数据库
+CREATE DATABASE IF NOT EXISTS book_management_system 
+DEFAULT CHARACTER SET utf8mb4 
+DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE book_management_system;
+
+-- 1. 用户表
+CREATE TABLE IF NOT EXISTS sys_user (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '用户ID',
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+    password VARCHAR(100) NOT NULL COMMENT '密码（加密存储）',
+    real_name VARCHAR(50) NOT NULL COMMENT '真实姓名',
+    phone VARCHAR(20) UNIQUE COMMENT '手机号码',
+    email VARCHAR(100) UNIQUE COMMENT '邮箱地址',
+    avatar VARCHAR(255) COMMENT '头像URL',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '用户状态：0-禁用，1-正常',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统用户表';
+
+-- 2. 角色表
+CREATE TABLE IF NOT EXISTS sys_role (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '角色ID',
+    role_name VARCHAR(50) NOT NULL UNIQUE COMMENT '角色名称',
+    role_code VARCHAR(50) NOT NULL UNIQUE COMMENT '角色编码',
+    description VARCHAR(255) COMMENT '角色描述',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '角色状态：0-禁用，1-正常',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统角色表';
+
+-- 3. 用户角色关联表
+CREATE TABLE IF NOT EXISTS sys_user_role (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '关联ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    role_id BIGINT NOT NULL COMMENT '角色ID',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    UNIQUE KEY uk_user_role (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES sys_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES sys_role(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色关联表';
+
+-- 4. 图书分类表
+CREATE TABLE IF NOT EXISTS book_category (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '分类ID',
+    category_name VARCHAR(100) NOT NULL UNIQUE COMMENT '分类名称',
+    category_code VARCHAR(50) NOT NULL UNIQUE COMMENT '分类编码',
+    parent_id BIGINT NOT NULL DEFAULT 0 COMMENT '父分类ID，0表示顶级分类',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序号',
+    description VARCHAR(255) COMMENT '分类描述',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '分类状态：0-禁用，1-正常',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='图书分类表';
+
+-- 5. 图书表
+CREATE TABLE IF NOT EXISTS book (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '图书ID',
+    book_name VARCHAR(255) NOT NULL COMMENT '图书名称',
+    isbn VARCHAR(20) NOT NULL UNIQUE COMMENT 'ISBN编号',
+    author VARCHAR(100) NOT NULL COMMENT '作者',
+    publisher VARCHAR(100) NOT NULL COMMENT '出版社',
+    publish_date DATE COMMENT '出版日期',
+    category_id BIGINT NOT NULL COMMENT '分类ID',
+    cover_url VARCHAR(255) COMMENT '封面图片URL',
+    description TEXT COMMENT '图书简介',
+    price DECIMAL(10, 2) COMMENT '图书价格',
+    pages INT COMMENT '页数',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '图书状态：0-下架，1-上架',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+    FOREIGN KEY (category_id) REFERENCES book_category(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='图书信息表';
+
+-- 6. 图书库存表
+CREATE TABLE IF NOT EXISTS book_stock (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '库存ID',
+    book_id BIGINT NOT NULL UNIQUE COMMENT '图书ID',
+    total_quantity INT NOT NULL DEFAULT 0 COMMENT '总数量',
+    available_quantity INT NOT NULL DEFAULT 0 COMMENT '可借数量',
+    borrowed_quantity INT NOT NULL DEFAULT 0 COMMENT '已借数量',
+    location VARCHAR(100) COMMENT '存放位置',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (book_id) REFERENCES book(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='图书库存表';
+
+-- 7. 借阅记录表
+CREATE TABLE IF NOT EXISTS book_borrow (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '借阅ID',
+    book_id BIGINT NOT NULL COMMENT '图书ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    borrow_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '借阅时间',
+    due_time DATETIME NOT NULL COMMENT '应还时间',
+    return_time DATETIME COMMENT '归还时间',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '借阅状态：0-借阅中，1-已归还，2-逾期',
+    fine_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '罚款金额',
+    fine_status TINYINT NOT NULL DEFAULT 0 COMMENT '罚款状态：0-未缴纳，1-已缴纳',
+    remark VARCHAR(255) COMMENT '备注',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (book_id) REFERENCES book(id),
+    FOREIGN KEY (user_id) REFERENCES sys_user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='图书借阅记录表';
+
+-- 初始化数据
+-- 插入默认角色
+INSERT INTO sys_role (role_name, role_code, description) VALUES 
+('超级管理员', 'admin', '拥有系统所有权限'),
+('普通用户', 'user', '普通借阅用户');
+
+-- 插入默认管理员用户（密码：123456，需要在代码中加密）
+INSERT INTO sys_user (username, password, real_name, phone, email) VALUES 
+('admin', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '系统管理员', '13800138000', 'admin@example.com');
+
+-- 插入用户角色关联
+INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
+
+-- 插入默认图书分类
+INSERT INTO book_category (category_name, category_code, parent_id, sort_order) VALUES 
+('计算机科学', 'computer', 0, 1),
+('文学艺术', 'literature', 0, 2),
+('历史地理', 'history', 0, 3),
+('自然科学', 'science', 0, 4),
+('经济管理', 'economy', 0, 5);
