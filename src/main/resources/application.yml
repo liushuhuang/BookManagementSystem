@@ -2,6 +2,18 @@ server:
   port: 8080
 
 spring:
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/bms?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai

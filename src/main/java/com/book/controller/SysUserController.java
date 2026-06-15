@@ -1,10 +1,13 @@
 package com.book.controller;
 
 import com.book.common.Result;
-import com.book.entity.SysUser;
+import com.book.domain.entity.SysUser;
 import com.book.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/user")
