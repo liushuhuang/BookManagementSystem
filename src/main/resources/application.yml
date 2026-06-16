@@ -1,6 +1,10 @@
 server:
   port: 8080
 
+book:
+  security:
+    jwt-secret: ${BMS_JWT_SECRET:privateKey}
+
 spring:
   redis:
     host: localhost

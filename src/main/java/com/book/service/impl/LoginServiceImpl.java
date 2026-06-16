@@ -7,6 +7,7 @@ import com.book.domain.dto.LoginDto;
 import com.book.domain.entity.SysUser;
 import com.book.service.LoginService;
 import com.book.service.SysUserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +18,14 @@ import java.util.Map;
 @Service
 public class LoginServiceImpl implements LoginService {
 
-    private static final String TOKEN_SECRET = "privateKey";
+    private final SysUserService sysUserService;
+    private final String tokenSecret;
 
-    private SysUserService sysUserService;
+    public LoginServiceImpl(SysUserService sysUserService,
+                            @Value("${book.security.jwt-secret}") String tokenSecret) {
+        this.sysUserService = sysUserService;
+        this.tokenSecret = tokenSecret;
+    }
 
     @Override
     public String login(LoginDto  dto) {
@@ -37,6 +43,8 @@ public class LoginServiceImpl implements LoginService {
         //如果都检验成功了就可以生成jwt的token了
         Map<String,Object> map = new HashMap<>();
         map.put("uid",sysUser.getId());
-        return JWTUtil.createToken(map,TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
+        return JWTUtil.createToken(map,tokenSecret.getBytes(StandardCharsets.UTF_8));
     }
+
+
 }
