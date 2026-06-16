@@ -3,6 +3,7 @@ package com.book.domain.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Data
@@ -12,10 +13,13 @@ public class SysUser {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    @NotBlank(message = "用户名不得为空")
     private String username;
 
-    private String password;
 
+    @NotBlank(message = "密码不得为空")
+    private String password;
+    @NotBlank(message = "真实姓名不得为空")
     private String realName;
 
     private String phone;
