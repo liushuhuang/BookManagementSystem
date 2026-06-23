@@ -28,7 +28,13 @@ public class SysUser {
 
     private String avatar;
 
+    private String readerNo;
+
+    private Integer maxBorrowCount;
+
     private Integer status;
+
+    private LocalDateTime lastLoginTime;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
