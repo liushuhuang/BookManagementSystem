@@ -276,3 +276,13 @@ INSERT INTO `book_category` (`id`, `category_name`, `category_code`, `parent_id`
   (3, '历史地理', 'history', 0, 30, '历史、地理、人文相关图书', 1),
   (4, '自然科学', 'science', 0, 40, '数学、物理、化学、生物等自然科学图书', 1),
   (5, '经济管理', 'economy', 0, 50, '经济、管理、商业相关图书', 1);
+
+INSERT INTO `sys_user` (`id`, `username`, `password`, `real_name`, `reader_no`, `max_borrow_count`, `status`) VALUES
+  (1, 'admin_test', '$2a$10$cXLCHfKlrEPKfDmBeC7VpOQk/U7h8.y.begZ0FZu6H/VPkn/GAXxG', '系统管理员', 'R0001', 5, 1),
+  (2, 'librarian_test', '$2a$10$cXLCHfKlrEPKfDmBeC7VpOQk/U7h8.y.begZ0FZu6H/VPkn/GAXxG', '图书管理员', 'R0002', 5, 1),
+  (3, 'reader_test', '$2a$10$cXLCHfKlrEPKfDmBeC7VpOQk/U7h8.y.begZ0FZu6H/VPkn/GAXxG', '普通读者', 'R0003', 5, 1);
+
+INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
+  (1, 1),
+  (2, 2),
+  (3, 3);
