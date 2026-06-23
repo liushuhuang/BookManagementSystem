@@ -23,6 +23,14 @@ public final class AuthContext {
         return loginUser;
     }
 
+    public static LoginUser requireManager() {
+        LoginUser loginUser = require();
+        if (!loginUser.hasAnyRole("admin", "librarian")) {
+            throw new BusinessException(403, "无权限访问");
+        }
+        return loginUser;
+    }
+
     public static void clear() {
         CURRENT.remove();
     }
